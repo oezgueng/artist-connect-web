@@ -84,16 +84,33 @@ html{scroll-behavior:smooth}
   background:radial-gradient(circle at 50% 50%,rgba(29,215,91,.13),rgba(29,215,91,.03) 42%,transparent 66%);
   pointer-events:none
 }
+/* Der Globus sitzt im selben Raster wie der Text, nicht frei am Fensterrand —
+   sonst klafft auf breiten Bildschirmen eine Lücke dazwischen und die Spalte
+   wirkt grundlos zusammengedrückt. */
+.hero .wrap{max-width:1180px}
+.hero-grid{display:grid;gap:48px;align-items:center}
+.hero-copy{min-width:0}
+.hero-visual{position:relative;min-width:0}
+
 #globe{
-  position:absolute;z-index:1;top:50%;left:50%;transform:translate(-50%,-50%);
-  width:min(1180px,135vw);aspect-ratio:1;opacity:0;pointer-events:none;
+  display:block;width:100%;aspect-ratio:1;opacity:0;pointer-events:none;
   transition:opacity .6s ease;
-  -webkit-mask-image:radial-gradient(circle at 50% 50%,#000 52%,transparent 78%);
-  mask-image:radial-gradient(circle at 50% 50%,#000 52%,transparent 78%);
+  -webkit-mask-image:radial-gradient(circle at 50% 50%,#000 54%,transparent 80%);
+  mask-image:radial-gradient(circle at 50% 50%,#000 54%,transparent 80%);
 }
+
+/* Schmal: der Globus liegt hinter dem Text und trägt nur Stimmung bei. */
+@media (max-width:899px){
+  .hero-visual{
+    position:absolute;inset:0;z-index:0;
+    display:flex;align-items:center;justify-content:center
+  }
+  #globe{width:min(760px,130vw);height:auto}
+  .hero-copy{position:relative;z-index:2}
+}
+
 @media (min-width:900px){
-  #globe{left:auto;right:-16%;transform:translateY(-50%);width:min(880px,70vw)}
-  .hero .wrap{padding-right:34%}
+  .hero-grid{grid-template-columns:minmax(0,1.05fr) minmax(0,.95fr)}
 }
 
 .scroll-hint{
