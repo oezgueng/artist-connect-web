@@ -1,0 +1,15 @@
+{
+  "applinks": {
+    "apps": [],
+    "details": [
+      {
+        "appIDs": ["59WB7FLD93.com.oezgueng.musicconnect"],
+        "components": [
+          { "/": "/verify-email*", "comment": "E-Mail-Bestaetigung" },
+          { "/": "/u/*", "comment": "Profil" },
+          { "/": "/open*", "comment": "Generischer App-Link" }
+        ]
+      }
+    ]
+  }
+}

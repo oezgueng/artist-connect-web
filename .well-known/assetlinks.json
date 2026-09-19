@@ -1,0 +1,12 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.oezgueng.musicconnect",
+      "sha256_cert_fingerprints": [
+        "3E:9D:A0:16:A8:81:E9:08:3B:56:16:34:F8:14:82:16:C1:56:6A:95:E3:24:3F:5D:BD:5C:86:93:32:0F:70:1C"
+      ]
+    }
+  }
+]
