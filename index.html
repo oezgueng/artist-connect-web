@@ -12,72 +12,119 @@
 <meta property="og:url" content="https://artist-connect.de/">
 <meta name="apple-itunes-app" content="app-id=6739004785">
 <link rel="canonical" href="https://artist-connect.de/">
+<link rel="preload" href="/vendor/three.core.min.js" as="script" crossorigin>
 <link rel="stylesheet" href="/style.css">
 </head>
 <body>
-<div class="wrap">
 
-  <header>
-    <div class="mark">AC</div>
-    <p class="eyebrow" style="margin-top:28px">Artistconnect</p>
-    <h1>THE MUSIC INDUSTRY.<br><span class="tag">LIVE.</span></h1>
-    <p class="lede">
+<div class="progress"><span></span></div>
+
+<!-- ===== Bühne ===== -->
+<section class="hero">
+  <div class="hero-glow" aria-hidden="true"></div>
+  <canvas id="globe" aria-hidden="true"></canvas>
+
+  <div class="wrap">
+    <div class="mark" data-reveal="0">AC</div>
+    <p class="eyebrow" style="margin-top:28px" data-reveal="60">Artistconnect</p>
+    <h1 data-reveal="120">THE MUSIC INDUSTRY.<br><span class="tag">LIVE.</span></h1>
+    <p class="lede" data-reveal="200">
       Eine Karte statt einer Kontaktliste. Sieh, wer aus der Musikbranche gerade
       online ist, wer heute verfügbar ist und wofür — und schreib direkt los.
     </p>
-    <span class="pill">ehemals MusicConnect</span>
+    <span class="pill" data-reveal="260">ehemals MusicConnect</span>
 
-    <div class="stores">
+    <div class="stores" data-reveal="320">
       <a class="btn btn-primary" href="https://apps.apple.com/app/id6739004785">Im App&nbsp;Store laden</a>
       <a class="btn btn-secondary" href="https://play.google.com/store/apps/details?id=com.oezgueng.musicconnect">Bei Google&nbsp;Play laden</a>
     </div>
 
-    <p class="live"><span class="dot" aria-hidden="true"></span> Online-Status und Verfügbarkeit in Echtzeit</p>
-  </header>
+    <p class="live" data-reveal="380"><span class="dot" aria-hidden="true"></span> Online-Status und Verfügbarkeit in Echtzeit</p>
+  </div>
 
+  <div class="scroll-hint" aria-hidden="true"><span>Scroll</span><i></i></div>
+</section>
+
+<div class="wrap">
+
+  <!-- ===== Aussage ===== -->
   <section>
-    <h2>Was die App macht</h2>
+    <h2 data-reveal>Die Idee</h2>
+    <p class="statement" data-reveal="80">
+      Die Musikbranche läuft über Timing.
+      <span class="dim">Nicht darüber, wen du irgendwann mal kennengelernt hast, sondern darüber, wer heute Abend Zeit im Studio hat.</span>
+    </p>
+  </section>
+
+  <!-- ===== Funktionen ===== -->
+  <section>
+    <h2 data-reveal>Was die App macht</h2>
     <div class="cards">
-      <article class="card">
+      <article class="card" data-reveal="0">
         <h3>Live-Karte</h3>
         <p>Rausgezoomt Ballungsräume mit Zahlen und Rollen, reingezoomt einzelne Profile. Deine genaue Position verlässt nie dein Gerät.</p>
       </article>
-      <article class="card">
+      <article class="card" data-reveal="90">
         <h3>Available Now</h3>
         <p>Sag der Szene für ein paar Stunden, wofür du gerade zu haben bist: Studio-Session, Feature, Mixing, Gig.</p>
       </article>
-      <article class="card">
+      <article class="card" data-reveal="180">
         <h3>Connect mit Grund</h3>
         <p>Keine anonymen Anfragen. Jede Kontaktaufnahme sagt, worum es geht.</p>
       </article>
-      <article class="card">
+      <article class="card" data-reveal="270">
         <h3>Ghost Mode</h3>
         <p>Ein Schalter, und du bist von der Karte verschwunden. Sichtbarkeit ist eine Entscheidung, keine Voreinstellung.</p>
       </article>
     </div>
   </section>
 
+  <!-- ===== Zahlen ===== -->
   <section>
-    <h2>Für wen</h2>
-    <div class="cards">
-      <article class="card"><h3>Artists &amp; Producer</h3><p>Rapper, Sänger, Beatmaker, Songwriter, Instrumentalisten, DJs.</p></article>
-      <article class="card"><h3>Studios &amp; Technik</h3><p>Aufnahmestudios, Mixing- und Mastering-Engineers, Live-Ton.</p></article>
-      <article class="card"><h3>Business</h3><p>Manager, A&amp;R, Booking, Labels, Promoter, Venues.</p></article>
-      <article class="card"><h3>Visuals</h3><p>Fotografen, Videografen, Grafik, Styling, Content.</p></article>
+    <h2 data-reveal>In Zahlen</h2>
+    <div class="stats">
+      <div class="stat" data-reveal="0"><b data-count="32">0</b><span>Rollen von Rapper bis Booking Agent</span></div>
+      <div class="stat" data-reveal="80"><b data-count="38">0</b><span>Genres</span></div>
+      <div class="stat" data-reveal="160"><b data-count="38">0</b><span>Instrumente</span></div>
+      <div class="stat" data-reveal="240"><b data-count="18" data-suffix="+">0</b><span>Altersfreigabe</span></div>
     </div>
   </section>
 
+  <!-- ===== Zielgruppen ===== -->
   <section>
-    <h2>In Partnerschaft mit</h2>
+    <h2 data-reveal>Für wen</h2>
+    <div class="cards">
+      <article class="card" data-reveal="0"><h3>Artists &amp; Producer</h3><p>Rapper, Sänger, Beatmaker, Songwriter, Instrumentalisten, DJs, Bands.</p></article>
+      <article class="card" data-reveal="90"><h3>Studios &amp; Technik</h3><p>Aufnahmestudios, Mixing- und Mastering-Engineers, Live-Ton.</p></article>
+      <article class="card" data-reveal="180"><h3>Business</h3><p>Manager, A&amp;R, Booking, Labels, Promoter, Venues, Verlage.</p></article>
+      <article class="card" data-reveal="270"><h3>Visuals</h3><p>Fotografen, Videografen, Grafik, Styling, Content.</p></article>
+    </div>
+  </section>
+
+  <!-- ===== Partner ===== -->
+  <section>
+    <h2 data-reveal>In Partnerschaft mit</h2>
     <div class="partners">
-      <a class="partner" href="https://og-records.com" rel="noopener">
+      <a class="partner" href="https://og-records.com" rel="noopener" data-reveal="0">
         <img src="/partners/og-records.png" alt="OG Records" width="112" height="60" loading="lazy">
         <span><p class="name">OG Records</p><p class="role">Label &amp; Vertrieb</p></span>
       </a>
-      <a class="partner" href="https://stashhouse-studios.com" rel="noopener">
+      <a class="partner" href="https://stashhouse-studios.com" rel="noopener" data-reveal="90">
         <img src="/partners/stashhouse.png" alt="stasHHouse Studios" width="51" height="60" loading="lazy">
         <span><p class="name">stasHHouse Studios</p><p class="role">Aufnahmestudio, Hamburg</p></span>
       </a>
+    </div>
+  </section>
+
+  <!-- ===== Abschluss ===== -->
+  <section>
+    <div class="cta" data-reveal>
+      <h2>Loslegen</h2>
+      <p class="statement">Lade die App, setz deinen Status — und sieh, wer gerade da ist.</p>
+      <div class="stores">
+        <a class="btn btn-primary" href="https://apps.apple.com/app/id6739004785">Im App&nbsp;Store laden</a>
+        <a class="btn btn-secondary" href="https://play.google.com/store/apps/details?id=com.oezgueng.musicconnect">Bei Google&nbsp;Play laden</a>
+      </div>
     </div>
   </section>
 
@@ -92,5 +139,7 @@
   </footer>
 
 </div>
+
+<script type="module" src="/main.js"></script>
 </body>
 </html>
