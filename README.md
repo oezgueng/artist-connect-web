@@ -1,6 +1,6 @@
 # artist-connect-web
 
-Landingpage für **ArtistConnect** (ehemals MusicConnect), plus die beiden
+Landingpage für **Artist-Connect** (ehemals MusicConnect), plus die beiden
 Dateien, die iOS und Android brauchen, damit Links in der App landen.
 
     .well-known/apple-app-site-association   Universal Links (iOS)
