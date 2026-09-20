@@ -10,9 +10,10 @@
  * eingestellt hat; sonst bleibt der statische Verlauf im CSS stehen.
  */
 import {
-  AdditiveBlending, BufferAttribute, BufferGeometry, Color, Group, Line,
-  LineBasicMaterial, PerspectiveCamera, Points, PointsMaterial,
-  QuadraticBezierCurve3, Scene, Vector3, WebGLRenderer,
+  AdditiveBlending, BufferAttribute, BufferGeometry, Color, DataTexture, Group,
+  Line, LineBasicMaterial, LinearFilter, NormalBlending, PerspectiveCamera,
+  Points, PointsMaterial, QuadraticBezierCurve3, RGBAFormat, Scene, Vector3,
+  WebGLRenderer,
 } from './vendor/three.module.min.js';
 
 const DOT_COUNT = 5200;
@@ -20,8 +21,55 @@ const LIVE_COUNT = 64;
 const ARC_COUNT = 14;
 const RADIUS = 1;
 
+/**
+ * Geografische Koordinate auf die Kugel.
+ *
+ * Braucht die Live-Fassung: dort sitzen die grünen Punkte nicht irgendwo,
+ * sondern dort, wo die Städte wirklich liegen. Für den Kopfbereich ist es
+ * egal, für die Live-Karte ist es der ganze Punkt.
+ */
+export function latLngToVector3(lat, lng, radius = RADIUS) {
+  const phi = (90 - lat) * (Math.PI / 180);
+  const theta = (lng + 180) * (Math.PI / 180);
+  return new Vector3(
+    -radius * Math.sin(phi) * Math.cos(theta),
+    radius * Math.cos(phi),
+    radius * Math.sin(phi) * Math.sin(theta),
+  );
+}
+
 const COLOR_DOT = new Color('#2f2f2f');
 const COLOR_LIVE = new Color('#1dd75b');
+
+/**
+ * Weiche runde Scheibe als Punkt-Textur.
+ *
+ * PointsMaterial zeichnet ohne Textur Quadrate. Aus der Ferne fällt das nicht
+ * auf, herangezoomt sind es sichtbare Kästchen — und eine Stadt als Kästchen
+ * sieht aus wie ein Darstellungsfehler, nicht wie ein Ort. Die Textur entsteht
+ * im Code, damit keine zusätzliche Datei ausgeliefert werden muss.
+ */
+let discCache = null;
+function disc() {
+  if (discCache) return discCache;
+  const size = 64;
+  const data = new Uint8Array(size * size * 4);
+  const c = (size - 1) / 2;
+  for (let y = 0; y < size; y++) {
+    for (let x = 0; x < size; x++) {
+      const d = Math.hypot(x - c, y - c) / c;
+      const a = d >= 1 ? 0 : Math.round(255 * Math.min(1, (1 - d) * 3));
+      const i = (y * size + x) * 4;
+      data[i] = 255; data[i + 1] = 255; data[i + 2] = 255; data[i + 3] = a;
+    }
+  }
+  const tex = new DataTexture(data, size, size, RGBAFormat);
+  tex.minFilter = LinearFilter;
+  tex.magFilter = LinearFilter;
+  tex.needsUpdate = true;
+  discCache = tex;
+  return tex;
+}
 
 /** Gleichmäßige Punkteverteilung auf der Kugel (Fibonacci-Spirale). */
 function spherePoints(count, radius) {
@@ -36,24 +84,29 @@ function spherePoints(count, radius) {
   return pts;
 }
 
-function buildDots(points) {
+function buildDots(points, opacity = 0.9) {
   const pos = new Float32Array(points.length * 3);
   points.forEach((p, i) => { pos[i * 3] = p.x; pos[i * 3 + 1] = p.y; pos[i * 3 + 2] = p.z; });
   const geo = new BufferGeometry();
   geo.setAttribute('position', new BufferAttribute(pos, 3));
   return new Points(geo, new PointsMaterial({
-    color: COLOR_DOT, size: 0.0085, sizeAttenuation: true, transparent: true, opacity: 0.9,
+    color: COLOR_DOT, size: 0.0085, sizeAttenuation: true, transparent: true, opacity,
+    map: disc(), alphaTest: 0.02, depthWrite: false,
   }));
 }
 
-function buildLive(points) {
+function buildLive(points, size = 0.03, additive = true) {
   const pos = new Float32Array(points.length * 3);
   points.forEach((p, i) => { pos[i * 3] = p.x; pos[i * 3 + 1] = p.y; pos[i * 3 + 2] = p.z; });
   const geo = new BufferGeometry();
   geo.setAttribute('position', new BufferAttribute(pos, 3));
   return new Points(geo, new PointsMaterial({
-    color: COLOR_LIVE, size: 0.03, sizeAttenuation: true,
-    transparent: true, opacity: 0.95, blending: AdditiveBlending, depthWrite: false,
+    color: COLOR_LIVE, size, sizeAttenuation: true, map: disc(),
+    // Kein additives Mischen auf der Live-Karte: dort liegen sieben Berliner
+    // Zellen aufeinander, und additiv addiert sich Grün zu Weiß — ein Ort mit
+    // vielen Menschen sah aus wie ein Fehler statt wie ein voller Ort.
+    transparent: true, opacity: 0.95,
+    blending: additive ? AdditiveBlending : NormalBlending, depthWrite: false,
   }));
 }
 
@@ -69,7 +122,13 @@ function buildArc(a, b) {
   }));
 }
 
-export function mountGlobe(canvas) {
+/**
+ * @param {HTMLCanvasElement} canvas
+ * @param {{cities?: {lat:number,lng:number,online:number,total:number}[], spin?:number, tilt?:number}} [options]
+ *   `cities` setzt die grünen Punkte auf echte Orte statt auf Zufallsstellen.
+ *   Ohne die Angabe verhält sich der Globus wie bisher (Kopfbereich).
+ */
+export function mountGlobe(canvas, options = {}) {
   const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   let renderer;
   try {
@@ -85,22 +144,58 @@ export function mountGlobe(canvas) {
 
   const world = new Group();
   world.rotation.z = -0.38; // leichte Achsneigung, wie ein Globus
+
+  /**
+   * Auf eine Gegend ausrichten und heranfahren.
+   *
+   * Eine ganze Weltkugel ist das falsche Bild, solange alle Zahlen in einem
+   * Land stehen: Berlin, Hamburg und Potsdam liegen darauf zusammen auf einem
+   * Punkt. Der Globus bleibt also ein Globus, schaut aber dorthin, wo etwas
+   * ist, und rückt so weit heran, dass die Orte auseinandergehen.
+   *
+   * Ein Ort liegt in der xz-Ebene bei -Längengrad; um ihn zur Kamera zu
+   * drehen, muss er auf 90° stehen. Die Breite wird anschließend um genau
+   * ihren eigenen Wert weggekippt, dann sitzt er mittig im Bild.
+   */
+  let baseX = 0;
+  if (options.focus) {
+    const { lat, lng } = options.focus;
+    world.rotation.z = 0;
+    world.rotation.y = (-lng - 90) * (Math.PI / 180);
+    baseX = lat * (Math.PI / 180);
+    world.rotation.x = baseX;
+    camera.position.set(0, 0, options.focus.distance || 1.85);
+    camera.lookAt(0, 0, 0);
+  }
   scene.add(world);
 
-  const all = spherePoints(DOT_COUNT, RADIUS);
-  world.add(buildDots(all));
+  // Die Live-Fassung sitzt in einer kleinen Kachel. Dieselbe Punktdichte wie im
+  // Kopfbereich ergibt dort keine Kugel aus Punkten, sondern eine graue
+  // Scheibe, hinter der die grünen Städte verschwinden.
+  const all = spherePoints(options.dots || DOT_COUNT, RADIUS);
+  world.add(buildDots(all, options.dotOpacity ?? 0.9));
 
-  // "Online"-Punkte bevorzugt auf der Nordhalbkugel, dort liegt Europa.
+  // Mit echten Städten sitzen die Punkte dort, wo Menschen sind. Ohne sie
+  // bleibt die alte Streuung: der Kopfbereich ist Bild, nicht Bericht.
+  const cities = Array.isArray(options.cities) ? options.cities : null;
   const live = [];
-  for (let i = 0; i < LIVE_COUNT; i++) {
-    const idx = Math.floor(Math.abs(Math.sin(i * 12.9898) * 43758.5453) % 1 * all.length);
-    const p = all[idx];
-    if (p) live.push(p.clone().multiplyScalar(1.012));
+  if (cities && cities.length) {
+    for (const c of cities) live.push(latLngToVector3(c.lat, c.lng, RADIUS * 1.012));
+  } else {
+    for (let i = 0; i < LIVE_COUNT; i++) {
+      const idx = Math.floor(Math.abs(Math.sin(i * 12.9898) * 43758.5453) % 1 * all.length);
+      const p = all[idx];
+      if (p) live.push(p.clone().multiplyScalar(1.012));
+    }
   }
-  world.add(buildLive(live));
+  world.add(buildLive(live, options.liveSize ?? 0.03, options.additive !== false));
 
+  // Bögen sind im Kopfbereich ein Bild für "Verbindung". Auf der Live-Karte
+  // wären sie eine Behauptung: zwischen Berlin und Hamburg verläuft dort keine
+  // Verbindung, die wir kennen. Also bleiben sie dort weg.
   const arcs = [];
-  for (let i = 0; i < ARC_COUNT && live.length > 1; i++) {
+  const wantArcs = options.arcs !== false;
+  for (let i = 0; wantArcs && i < ARC_COUNT && live.length > 1; i++) {
     const a = live[(i * 7) % live.length];
     const b = live[(i * 13 + 5) % live.length];
     if (a.distanceTo(b) < 0.4) continue;
@@ -144,10 +239,10 @@ export function mountGlobe(canvas) {
 
     if (opacity < 1) { opacity = Math.min(1, opacity + 0.02); canvas.style.opacity = String(opacity); }
 
-    world.rotation.y += reduced ? 0 : 0.0016;
+    world.rotation.y += reduced ? 0 : (typeof options.spin === 'number' ? options.spin : 0.0016);
     curX += (targetX - curX) * 0.05;
     curY += (targetY - curY) * 0.05;
-    world.rotation.x = curX;
+    world.rotation.x = baseX + curX;
     camera.position.x = curY * 0.8;
     camera.lookAt(0, 0, 0);
 

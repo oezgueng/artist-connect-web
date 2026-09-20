@@ -56,6 +56,14 @@ document.querySelectorAll('[data-count]').forEach((el) => {
   io.observe(el);
 });
 
+/* ---- Live-Karte --------------------------------------------------------- */
+const liveRoot = document.querySelector('[data-live-root]');
+if (liveRoot) {
+  import('./live.js')
+    .then((m) => m.mountLive(liveRoot))
+    .catch(() => { liveRoot.dataset.state = 'failed'; });
+}
+
 /* ---- Globus ------------------------------------------------------------- */
 const canvas = document.getElementById('globe');
 if (canvas) {

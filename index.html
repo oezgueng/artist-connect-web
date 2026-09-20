@@ -12,6 +12,12 @@
 <meta property="og:url" content="https://artist-connect.de/">
 <meta name="apple-itunes-app" content="app-id=6739004785">
 <link rel="canonical" href="https://artist-connect.de/">
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="icon" href="/favicon-32.png" type="image/png" sizes="32x32">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<meta property="og:image" content="https://artist-connect.de/icon-512.png">
+<meta property="og:image:alt" content="Artist-Connect">
+<meta name="twitter:card" content="summary_large_image">
 <link rel="preload" href="/vendor/three.core.min.js" as="script" crossorigin>
 <link rel="stylesheet" href="/style.css">
 </head>
@@ -25,7 +31,7 @@
 
   <div class="wrap hero-grid">
    <div class="hero-copy">
-    <div class="mark" data-reveal="0">AC</div>
+    <img class="mark" src="/icon-256.png" width="76" height="76" alt="Artist-Connect" data-reveal="0">
     <p class="eyebrow" style="margin-top:28px" data-reveal="60">Artist-Connect</p>
     <h1 data-reveal="120">THE MUSIC INDUSTRY.<br><span class="tag">LIVE.</span></h1>
     <p class="lede" data-reveal="200">
@@ -35,8 +41,12 @@
     <span class="pill" data-reveal="260">ehemals MusicConnect</span>
 
     <div class="stores" data-reveal="320">
-      <a class="btn btn-primary" href="https://apps.apple.com/app/id6739004785">Im App&nbsp;Store laden</a>
-      <a class="btn btn-secondary" href="https://play.google.com/store/apps/details?id=com.oezgueng.musicconnect">Bei Google&nbsp;Play laden</a>
+      <a class="badge badge-apple" href="https://apps.apple.com/app/id6739004785" aria-label="Artist-Connect im App Store laden">
+        <img src="/badges/appstore-de.svg" alt="Laden im App Store" width="150" height="50" loading="lazy">
+      </a>
+      <a class="badge badge-google" href="https://play.google.com/store/apps/details?id=com.oezgueng.musicconnect" aria-label="Artist-Connect bei Google Play laden">
+        <img src="/badges/googleplay-de.png" alt="Jetzt bei Google Play" width="169" height="65" loading="lazy">
+      </a>
     </div>
 
     <p class="live" data-reveal="380"><span class="dot" aria-hidden="true"></span> Online-Status und Verfügbarkeit in Echtzeit</p>
@@ -57,6 +67,40 @@
       Die Musikbranche läuft über Timing.
       <span class="dim">Nicht darüber, wen du irgendwann mal kennengelernt hast, sondern darüber, wer heute Abend Zeit im Studio hat.</span>
     </p>
+  </section>
+
+
+  <!-- ===== Live-Karte ===== -->
+  <section id="live">
+    <h2 data-reveal>Gerade live</h2>
+    <div class="livemap" data-live-root data-state="loading" data-reveal="60">
+      <div class="livemap-figure">
+        <img src="/shots/map.webp" srcset="/shots/map@1x.webp 440w, /shots/map.webp 660w"
+             sizes="(max-width:720px) 220px, 300px"
+             width="660" height="1434" loading="lazy" decoding="async"
+             alt="Die Live-Karte in der App: Berliner Stadtteile als Punkte mit der Zahl der gerade Online.">
+      </div>
+
+      <div class="livemap-body">
+        <p class="statement" style="margin-top:0">
+          Wo gerade etwas los ist.
+          <span class="dim">Die Karte in der App zeigt Menschen. Hier siehst du nur Zahlen — auf zwanzig Kilometer genau und erst ab drei Profilen pro Feld.</span>
+        </p>
+
+        <div class="livemap-stats">
+          <div class="stat"><b data-live="total">—</b><span>Profile</span></div>
+          <div class="stat"><b data-live="cities">—</b><span>Orte</span></div>
+          <div class="stat"><b data-live="online">—</b><span>gerade online</span></div>
+        </div>
+
+        <ul class="cities" data-live="list"></ul>
+
+        <p class="livemap-note">
+          <span class="ok">Wer das ist, siehst du in der App.</span>
+          <span class="fail">Die Live-Zahlen sind gerade nicht erreichbar. In der App ist die Karte trotzdem da.</span>
+        </p>
+      </div>
+    </div>
   </section>
 
   <!-- ===== Funktionen ===== -->
@@ -125,8 +169,12 @@
       <h2>Loslegen</h2>
       <p class="statement">Lade die App, setz deinen Status — und sieh, wer gerade da ist.</p>
       <div class="stores">
-        <a class="btn btn-primary" href="https://apps.apple.com/app/id6739004785">Im App&nbsp;Store laden</a>
-        <a class="btn btn-secondary" href="https://play.google.com/store/apps/details?id=com.oezgueng.musicconnect">Bei Google&nbsp;Play laden</a>
+        <a class="badge badge-apple" href="https://apps.apple.com/app/id6739004785" aria-label="Artist-Connect im App Store laden">
+          <img src="/badges/appstore-de.svg" alt="Laden im App Store" width="150" height="50" loading="lazy">
+        </a>
+        <a class="badge badge-google" href="https://play.google.com/store/apps/details?id=com.oezgueng.musicconnect" aria-label="Artist-Connect bei Google Play laden">
+          <img src="/badges/googleplay-de.png" alt="Jetzt bei Google Play" width="169" height="65" loading="lazy">
+        </a>
       </div>
     </div>
   </section>
