@@ -233,3 +233,6 @@ html{scroll-behavior:smooth}
   .badge-apple img{height:44px;margin:6px 0}
   .badge-google img{height:58px}
 }
+
+/* Markenzeichen klein hochgestellt, z. B. OG-RECORDS.COM™ */
+.tm{font-size:.5em;vertical-align:super;line-height:0;margin-left:.08em;font-weight:500}
