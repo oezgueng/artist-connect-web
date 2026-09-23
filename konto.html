@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Konto — Artist-Connect</title>
+<meta name="robots" content="noindex">
+<meta name="referrer" content="no-referrer">
+<meta name="theme-color" content="#090909">
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="stylesheet" href="/style.css">
+<style>
+  .acct{max-width:440px;margin:0 auto;padding:72px 20px 48px}
+  .acct .mark{width:56px;height:56px;border-radius:14px;display:block;margin-bottom:28px}
+  .acct h1{font-size:30px;line-height:1.15;margin:0 0 10px}
+  .acct p.lede{color:var(--muted);font-size:16px;margin:0 0 28px}
+  .acct label{display:block;font-size:14px;font-weight:600;color:var(--muted);margin:0 0 8px}
+  .acct input{width:100%;box-sizing:border-box;height:52px;padding:0 16px;border-radius:14px;
+    border:1px solid var(--border);background:var(--card);color:var(--fg);font-size:16px;margin-bottom:16px}
+  .acct input:focus{outline:none;border-color:var(--border-strong)}
+  .acct .btn{width:100%;justify-content:center;cursor:pointer;font-family:inherit}
+  .acct .btn[disabled]{opacity:.5;cursor:default}
+  .acct .err{color:#ff5a5a;font-size:14px;min-height:20px;margin:0 0 12px}
+  .acct .hint{color:var(--subtle);font-size:13px;margin:-8px 0 16px}
+  .acct .ok{display:inline-block;width:10px;height:10px;border-radius:50%;background:var(--online);margin-right:8px}
+  .acct footer{margin-top:40px;color:var(--subtle);font-size:13px}
+  .acct footer a{color:var(--subtle)}
+  [hidden]{display:none!important}
+</style>
+</head>
+<body>
+<main class="acct">
+  <img class="mark" src="/icon-256.png" alt="Artist-Connect">
+
+  <section id="loading"><h1>Einen Moment …</h1></section>
+
+  <section id="reset" hidden>
+    <h1>Neues Passwort</h1>
+    <p class="lede">für <strong id="reset-email"></strong></p>
+    <form id="reset-form" novalidate>
+      <label for="pw">Neues Passwort</label>
+      <input id="pw" type="password" autocomplete="new-password" minlength="6" required>
+      <p class="hint">Mindestens 6 Zeichen.</p>
+      <label for="pw2">Wiederholen</label>
+      <input id="pw2" type="password" autocomplete="new-password" minlength="6" required>
+      <p class="err" id="reset-err" role="alert"></p>
+      <button class="btn btn-primary" id="reset-btn" type="submit">Passwort speichern</button>
+    </form>
+  </section>
+
+  <section id="done" hidden>
+    <h1 id="done-title"></h1>
+    <p class="lede" id="done-text"></p>
+    <a class="btn btn-primary" href="artistconnect://">Artist-Connect öffnen</a>
+  </section>
+
+  <section id="fail" hidden>
+    <h1>Link ungültig</h1>
+    <p class="lede" id="fail-text"></p>
+    <a class="btn btn-secondary" href="artistconnect://">Artist-Connect öffnen</a>
+  </section>
+
+  <footer>Artist-Connect · ehemals MusicConnect · <a href="/impressum">Impressum</a> · <a href="/datenschutz">Datenschutz</a></footer>
+</main>
+
+<script>
+/*
+ * Eigene Aktionsseite fuer Firebase-Auth-Mails (Passwort zuruecksetzen,
+ * E-Mail bestaetigen, E-Mail-Aenderung zuruecknehmen). Ersetzt die
+ * Standardseite unter musicconnect-e5da6.firebaseapp.com/__/auth/action, die
+ * noch den alten Projektnamen zeigt. Spricht die Identity-Toolkit-REST-API
+ * direkt an, damit die Seite ohne Firebase-SDK und ohne Drittanbieter-Skript
+ * auskommt. Der API-Schluessel kommt aus dem Link (Firebase haengt ihn an).
+ */
+(function () {
+  var q = new URLSearchParams(location.search);
+  var mode = q.get('mode');
+  var code = q.get('oobCode');
+  var key = q.get('apiKey') || 'AIzaSyAIY8NYVFl-MA3ONZ-hzCBHOMtGECmmf1k';
+  var $ = function (id) { return document.getElementById(id); };
+
+  var MESSAGES = {
+    EXPIRED_OOB_CODE: 'Der Link ist abgelaufen. Fordere in der App einen neuen an.',
+    INVALID_OOB_CODE: 'Der Link wurde schon benutzt oder ist unvollständig. Fordere in der App einen neuen an.',
+    USER_DISABLED: 'Dieses Konto ist gesperrt.',
+    USER_NOT_FOUND: 'Zu diesem Link gibt es kein Konto mehr.',
+    WEAK_PASSWORD: 'Das Passwort ist zu schwach. Nimm mindestens 6 Zeichen.'
+  };
+  var messageFor = function (code) {
+    var base = String(code || '').split(' ')[0].split(':')[0];
+    return MESSAGES[base] || 'Das hat nicht geklappt. Versuch es noch einmal.';
+  };
+
+  var show = function (id) {
+    ['loading', 'reset', 'done', 'fail'].forEach(function (s) { $(s).hidden = s !== id; });
+  };
+  var fail = function (errCode) { $('fail-text').textContent = messageFor(errCode); show('fail'); };
+  var done = function (title, text) { $('done-title').textContent = title; $('done-text').textContent = text; show('done'); };
+
+  var api = function (path, body) {
+    return fetch('https://identitytoolkit.googleapis.com/v1/' + path + '?key=' + encodeURIComponent(key), {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    }).then(function (r) {
+      return r.json().then(function (j) {
+        if (!r.ok) throw (j && j.error && j.error.message) || 'UNKNOWN';
+        return j;
+      });
+    });
+  };
+
+  if (!mode || !code) { fail('INVALID_OOB_CODE'); return; }
+
+  if (mode === 'resetPassword') {
+    // Ohne neues Passwort prueft der Aufruf nur den Code und nennt die Adresse.
+    api('accounts:resetPassword', { oobCode: code }).then(function (res) {
+      $('reset-email').textContent = res.email || '';
+      show('reset');
+      $('pw').focus();
+    }, fail);
+
+    $('reset-form').addEventListener('submit', function (e) {
+      e.preventDefault();
+      var pw = $('pw').value, pw2 = $('pw2').value, err = $('reset-err');
+      err.textContent = '';
+      if (pw.length < 6) { err.textContent = 'Mindestens 6 Zeichen.'; return; }
+      if (pw !== pw2) { err.textContent = 'Die beiden Passwörter stimmen nicht überein.'; return; }
+      $('reset-btn').disabled = true;
+      api('accounts:resetPassword', { oobCode: code, newPassword: pw }).then(function () {
+        done('Passwort geändert', 'Du kannst dich jetzt in der App mit dem neuen Passwort anmelden.');
+      }, function (c) {
+        $('reset-btn').disabled = false;
+        if (/WEAK_PASSWORD/.test(c)) err.textContent = messageFor(c); else fail(c);
+      });
+    });
+  } else if (mode === 'verifyEmail') {
+    api('accounts:update', { oobCode: code }).then(function () {
+      done('E-Mail bestätigt', 'Danke! Geh zurück in die App, es geht direkt weiter.');
+    }, fail);
+  } else if (mode === 'recoverEmail') {
+    api('accounts:update', { oobCode: code }).then(function (res) {
+      done('E-Mail zurückgesetzt', 'Dein Konto nutzt wieder ' + (res.email || 'die alte Adresse') +
+        '. Wenn du die Änderung nicht selbst gemacht hast, setz am besten auch dein Passwort zurück.');
+    }, fail);
+  } else {
+    fail('INVALID_OOB_CODE');
+  }
+})();
+</script>
+</body>
+</html>
